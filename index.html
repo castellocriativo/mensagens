@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Mensagens Automáticas - Gráfica Castello</title>
+  <link rel="icon" type="image/png" href="logoicon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      color: white;
+      min-height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      max-width: 900px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 30px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    header img.logo {
+      width: 280px;
+      margin-bottom: 15px;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    #modo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin: 20px 0;
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ffffff33;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #34c759;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .input-group {
+      display: flex;
+      justify-content: center;
+      flex-direction: center;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    input[type="text"] {
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 18px;
+      width: 100%;
+      max-width: 300px;
+      background: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.3);
+    }
+
+    .button-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    button {
+      background: white;
+      color: #4169E1;
+      border: none;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    button.pix-button {
+      background: #00FF7F;
+      color: white;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      background: #f8f9fa;
+    }
+
+    button.pix-button:hover {
+      background: #ff877a;
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <img src="logo.png" alt="Logo da Gráfica Castello" class="logo">
+      <h1>Mensagens Automáticas</h1>
+      <div id="modo-container">
+        <span id="modoTexto">Copiar Mensagem</span>
+        <label class="switch">
+          <input type="checkbox" id="modoToggle">
+          <span class="slider"></span>
+        </label>
+        <span id="modoTextoDireto">WhatsApp</span>
+      </div>
+    </header>
+
+    <div class="input-group">
+      <input type="text" id="cliente" placeholder="Nome do cliente (opcional)">
+      <input type="text" id="telefone" placeholder="Telefone (somente números)">
+    </div>
+
+    <div class="button-container">
+      <button onclick="enviar('dados_pedido', this)">Dados do Pedido 📝</button>
+      <button onclick="enviar('impresso_retirada', this)">Impresso Disponível 🖨️</button>
+      <button onclick="enviar('pagamento', this)">Pagamento Confirmado 💸</button>
+      
+      <button onclick="enviar('pedido_pronto', this)">Pedido Pronto 📦</button>
+      <button onclick="enviar('podemos_imprimir', this)">Podemos imprimir? 🖨️</button>
+      <button onclick="enviar('recebido', this)">Pedido Recebido 📝</button>
+      
+      <button onclick="enviar('horario', this)">Horário Funcionamento 🕒</button>
+      <button onclick="enviar('endereco', this)">Endereço da Loja 📍</button>
+      <button onclick="enviar('email', this)">Nosso E-mail 📧</button>
+      
+      <button onclick="enviar('autorizacao', this)">Autorização Divulgação 📸</button>
+      <button onclick="enviar('avaliacao', this)">Pedir Avaliação ⭐</button>
+      <button onclick="enviar('arte_aprovada', this)">Arte Aprovada 🚀</button>
+      
+      <button onclick="enviar('pagamento_opcoes', this)">Formas de Pagamento 💳</button>
+      <button class="pix-button" onclick="enviar('pix', this)">Chave PIX 🔑</button>
+      <button onclick="enviar('orcamento', this)">Enviar Orçamento 💼</button>
+      
+      <button onclick="enviar('custom1', this)">Personalizado 1</button>
+      <button onclick="enviar('custom2', this)">Personalizado 2</button>
+      <button onclick="enviar('custom3', this)">Personalizado 3</button>
+      
+      <button onclick="enviar('custom4', this)">Personalizado 4</button>
+      <button onclick="enviar('custom5', this)">Personalizado 5</button>
+      <button onclick="enviar('custom6', this)">Personalizado 6</button>
+    </div>
+  </div>
+
+  <script>
+    const modoToggle = document.getElementById("modoToggle");
+    const modoTexto = document.getElementById("modoTexto");
+    const modoTextoDireto = document.getElementById("modoTextoDireto");
+    
+    modoToggle.addEventListener("change", function() {
+      if (this.checked) {
+        modoTexto.style.opacity = 0.5;
+        modoTextoDireto.style.opacity = 1;
+      } else {
+        modoTexto.style.opacity = 1;
+        modoTextoDireto.style.opacity = 0.5;
+      }
+    });
+
+    function enviar(tipo, btn) {
+      const nome = document.getElementById('cliente').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+      let numeroFinal = "";
+      if (telefone) {
+        numeroFinal = telefone.startsWith("55") ? telefone : "55" + telefone;
+      }
+      const saudacao = nome ? `Olá, ${nome}! ` : " ";
+      
+      // Mensagens com quebras de linha explícitas
+      const mensagens = {
+        'recebido': `Recebemos seu arquivo com sucesso! 📝✨\n\nVocê gostaria que a gente já imprimisse e deixasse prontinho para retirada no balcão?\n\nSó nos confirme por aqui:\n- Se é impressão comum em preto e branco 🖤\n- Ou se deseja colorida ou em papel especial 🎨📄`,
+        
+        'pagamento': `Pagamento confirmado com sucesso! 💸`,
+        
+        'arte_aprovada': `Sua arte foi aprovada! 🚀 Vamos começar a produção.`,
+        
+        'pedido_pronto': `Seu pedido está prontinho para retirada! 📦💜\nVocê pode buscar na nossa loja:\n\n📍 Castello Criativo\nR. Délio da Consolação Rocha, 153 - Loja, Contagem - MG, 32015-180, Brasil\n🕒 Horário de funcionamento:\nSegunda a Sexta, das 8h às 18h\nSábado, das 9h às 12h\n\n🗺️ Localização no Google Maps:\nhttps://g.co/kgs/yz4trcv\n\nEstamos te esperando! 💛`,
+        
+        'avaliacao': `Olá! Gostou do seu pedido? 🥰 \n\nAvalie a Gráfica Castello no Google! É só clickar no link e dar a sua opniao: https://g.page/r/CRtlc8aFTCXPEAE/review\nIsso nos ajuda muito! ⭐⭐⭐⭐⭐`,
+        
+        'endereco': `Nosso endereço é:\nCastello Criativo\nR. Délio da Consolação Rocha, 153 - Loja\nContagem - MG, 32015-180, Brasil\n📍`,
+        
+        'email': `Nosso e-mail para contato é:\ncastellocriativo@gmail.com 📧`,
+        
+        'pagamento_opcoes': `Aceitamos:\n- PIX\n- Cartão de crédito (até 6x sem juros)\n- Cartão de débito\n- Dinheiro\n💳💰`,
+        
+        'orcamento': `Segue seu orçamento solicitado! 💼📋\nQualquer dúvida estou à disposição.`,
+        
+        'autorizacao': `Podemos divulgar fotos do seu material nas nossas redes sociais? 📸\n\nA gente divulga seu negócio e o nosso trabalho juntos! 💛\n\nSe quiser nos acompanhar por lá, é só clicar:\n\n✨ Instagram: instagram.com/castellocriativo\n✨ Facebook: facebook.com/castellocriativo\n✨ TikTok: tiktok.com/@castellocriativo`,
+        
+        'horario': `Nosso horário de funcionamento:\n\nSegunda a Sexta: 8h às 18h\nSábado: 9h às 12h\n🕒`,
+        
+        'pix': `Chave PIX (CNPJ):\n27306705000198\n\nApós efetuar o pagamento, envie o comprovante por gentileza.`,
+        
+        'dados_pedido': `Por favor, envie os dados completos para emissão do pedido:\n- Nome completo\n- CPF/CNPJ\n- Telefone\n- Endereço com CEP\n📝`,
+        
+        'impresso_retirada': `Seu material já foi impresso e está disponível para retirada! 🖨️📦`,
+        
+        'podemos_imprimir': `Podemos deixar o seu material impresso? Se sim, só me fale como quer:\n\n- Comum preto e branco\n- Colorido\n- Em papel especial (couche brilho ou cartão fosco)\n🖨️`,
+        
+        'custom1': `Mensagem personalizada 1.\nEdite este texto conforme sua necessidade. ✨`,
+        'custom2': `Mensagem personalizada 2.\nEdite este texto conforme sua necessidade. ✨`,
+        'custom3': `Mensagem personalizada 3.\nEdite este texto conforme sua necessidade. ✨`,
+        'custom4': `Mensagem personalizada 4.\nEdite este texto conforme sua necessidade. ✨`,
+        'custom5': `Mensagem personalizada 5.\nEdite este texto conforme sua necessidade. ✨`,
+        'custom6': `Mensagem personalizada 6.\nEdite este texto conforme sua necessidade. ✨`
+      };
+
+      const mensagem = mensagens[tipo] || "";
+      
+      if (modoToggle.checked) {
+        // Enviar para WhatsApp - converte quebras de linha para %0A
+        const textoWhatsApp = encodeURIComponent(saudacao + mensagem)
+          .replace(/%0A/g, '%0A')
+          .replace(/\n/g, '%0A');
+        
+        const link = numeroFinal 
+          ? `https://wa.me/${numeroFinal}?text=${textoWhatsApp}` 
+          : `https://wa.me/?text=${textoWhatsApp}`;
+        window.open(link, '_blank');
+      } else {
+        // Copiar para área de transferência - mantém as quebras normais
+        copyToClipboard(saudacao + mensagem, btn);
+      }
+    }
+    
+    function copyToClipboard(text, btn) {
+      // Usa a API moderna de clipboard se disponível
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+          showCopiedFeedback(btn);
+        }).catch(err => {
+          console.error("Erro ao copiar: ", err);
+          // Fallback para método antigo
+          legacyCopy(text, btn);
+        });
+      } else {
+        legacyCopy(text, btn);
+      }
+    }
+
+    function legacyCopy(text, btn) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = 'fixed';
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        showCopiedFeedback(btn);
+      } catch (err) {
+        console.error("Erro ao copiar: ", err);
+        alert("Não foi possível copiar a mensagem automaticamente. Você pode copiar manualmente.");
+      }
+      document.body.removeChild(textarea);
+    }
+
+    function showCopiedFeedback(btn) {
+      const originalText = btn.innerText;
+      btn.innerText = "✓ Copiado!";
+      btn.style.background = "#4CAF50";
+      btn.style.color = "white";
+      setTimeout(() => {
+        btn.innerText = originalText;
+        btn.style.background = "";
+        btn.style.color = "";
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
