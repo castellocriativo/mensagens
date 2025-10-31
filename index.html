@@ -157,6 +157,11 @@
       color: white;
     }
 
+    button.editar-button {
+      background: #FFA500;
+      color: white;
+    }
+
     button:hover {
       transform: translateY(-2px);
       box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
@@ -167,9 +172,119 @@
       background: #ff877a;
     }
 
+    button.editar-button:hover {
+      background: #ff8c00;
+    }
+
     button:active {
       transform: translateY(0);
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Estilos do modal de edição */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      overflow-y: auto;
+    }
+
+    .modal-content {
+      background: white;
+      color: #333;
+      margin: 5% auto;
+      padding: 30px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 800px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h2 {
+      color: #4169E1;
+      font-size: 24px;
+    }
+
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #333;
+    }
+
+    .editable-buttons {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    .button-editor {
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .button-editor h3 {
+      margin-bottom: 10px;
+      color: #4169E1;
+      font-size: 16px;
+    }
+
+    .button-editor input, .button-editor textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .button-editor textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-footer button {
+      padding: 10px 20px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .save-button {
+      background: #4CAF50;
+      color: white;
+    }
+
+    .cancel-button {
+      background: #f44336;
+      color: white;
     }
   </style>
 </head>
@@ -221,24 +336,187 @@
       <button onclick="enviar('custom4', this)">Personalizado 4</button>
       <button onclick="enviar('custom5', this)">Personalizado 5</button>
       <button onclick="enviar('custom6', this)">Personalizado 6</button>
+      
+      <button class="editar-button" onclick="abrirPainelEdicao()">Editar Mensagens ✏️</button>
+    </div>
+  </div>
+
+  <!-- Modal de Edição -->
+  <div id="modalEdicao" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Editar Mensagens</h2>
+        <span class="close" onclick="fecharPainelEdicao()">&times;</span>
+      </div>
+      
+      <div class="editable-buttons" id="editableButtons">
+        <!-- Os campos de edição serão inseridos aqui dinamicamente -->
+      </div>
+      
+      <div class="modal-footer">
+        <button class="cancel-button" onclick="fecharPainelEdicao()">Cancelar</button>
+        <button class="save-button" onclick="salvarEdicoes()">Salvar Alterações</button>
+      </div>
     </div>
   </div>
 
   <script>
-    const modoToggle = document.getElementById("modoToggle");
-    const modoTexto = document.getElementById("modoTexto");
-    const modoTextoDireto = document.getElementById("modoTextoDireto");
-    
-    modoToggle.addEventListener("change", function() {
-      if (this.checked) {
-        modoTexto.style.opacity = 0.5;
-        modoTextoDireto.style.opacity = 1;
-      } else {
-        modoTexto.style.opacity = 1;
-        modoTextoDireto.style.opacity = 0.5;
+    // Dados iniciais das mensagens
+    let mensagens = {
+      'recebido': {
+        textoBotao: 'Pedido Recebido 📝',
+        mensagem: `Recebemos seu arquivo com sucesso! 📝✨\n\nVocê gostaria que a gente já imprimisse e deixasse prontinho para retirada no balcão?\n\nSó nos confirme por aqui:\n- Se é impressão comum em preto e branco 🖤\n- Ou se deseja colorida ou em papel especial 🎨📄`
+      },
+      'pagamento': {
+        textoBotao: 'Pagamento Confirmado 💸',
+        mensagem: `Pagamento confirmado com sucesso! 💸`
+      },
+      'arte_aprovada': {
+        textoBotao: 'Arte Aprovada 🚀',
+        mensagem: `Sua arte foi aprovada! 🚀 Vamos começar a produção.`
+      },
+      'pedido_pronto': {
+        textoBotao: 'Pedido Pronto 📦',
+        mensagem: `Seu pedido está prontinho para retirada! 📦💜\nVocê pode buscar na nossa loja:\n\n📍 Castello Criativo\nR. Délio da Consolação Rocha, 153 - Loja, Contagem - MG, 32015-180, Brasil\n🕒 Horário de funcionamento:\nSegunda a Sexta, das 8h às 18h\nSábado, das 9h às 12h\n\n🗺️ Localização no Google Maps:\nhttps://g.co/kgs/yz4trcv\n\nEstamos te esperando! 💛`
+      },
+      'avaliacao': {
+        textoBotao: 'Pedir Avaliação ⭐',
+        mensagem: `Olá! Gostou do seu pedido? 🥰 \n\nAvalie a Gráfica Castello no Google! É só clickar no link e dar a sua opniao: https://g.page/r/CRtlc8aFTCXPEAE/review\nIsso nos ajuda muito! ⭐⭐⭐⭐⭐`
+      },
+      'endereco': {
+        textoBotao: 'Endereço da Loja 📍',
+        mensagem: `Nosso endereço é:\nCastello Criativo\nR. Délio da Consolação Rocha, 153 - Loja\nContagem - MG, 32015-180, Brasil\n📍`
+      },
+      'email': {
+        textoBotao: 'Nosso E-mail 📧',
+        mensagem: `Nosso e-mail para contato é:\ncastellocriativo@gmail.com 📧`
+      },
+      'pagamento_opcoes': {
+        textoBotao: 'Formas de Pagamento 💳',
+        mensagem: `Aceitamos:\n- PIX\n- Cartão de crédito (até 6x sem juros)\n- Cartão de débito\n- Dinheiro\n💳💰`
+      },
+      'orcamento': {
+        textoBotao: 'Enviar Orçamento 💼',
+        mensagem: `Segue seu orçamento solicitado! 💼📋\nQualquer dúvida estou à disposição.`
+      },
+      'autorizacao': {
+        textoBotao: 'Autorização Divulgação 📸',
+        mensagem: `Podemos divulgar fotos do seu material nas nossas redes sociais? 📸\n\nA gente divulga seu negócio e o nosso trabalho juntos! 💛\n\nSe quiser nos acompanhar por lá, é só clicar:\n\n✨ Instagram: instagram.com/castellocriativo\n✨ Facebook: facebook.com/castellocriativo\n✨ TikTok: tiktok.com/@castellocriativo`
+      },
+      'horario': {
+        textoBotao: 'Horário Funcionamento 🕒',
+        mensagem: `Nosso horário de funcionamento:\n\nSegunda a Sexta: 8h às 18h\nSábado: 9h às 12h\n🕒`
+      },
+      'pix': {
+        textoBotao: 'Chave PIX 🔑',
+        mensagem: `Chave PIX (CNPJ):\n27306705000198\n\nApós efetuar o pagamento, envie o comprovante por gentileza.`
+      },
+      'dados_pedido': {
+        textoBotao: 'Dados do Pedido 📝',
+        mensagem: `Por favor, envie os dados completos para emissão do pedido:\n- Nome completo\n- CPF/CNPJ\n- Telefone\n- Endereço com CEP\n📝`
+      },
+      'impresso_retirada': {
+        textoBotao: 'Impresso Disponível 🖨️',
+        mensagem: `Seu material já foi impresso e está disponível para retirada! 🖨️📦`
+      },
+      'podemos_imprimir': {
+        textoBotao: 'Podemos imprimir? 🖨️',
+        mensagem: `Podemos deixar o seu material impresso? Se sim, só me fale como quer:\n\n- Comum preto e branco\n- Colorido\n- Em papel especial (couche brilho ou cartão fosco)\n🖨️`
+      },
+      'custom1': {
+        textoBotao: 'Personalizado 1',
+        mensagem: `Mensagem personalizada 1.\nEdite este texto conforme sua necessidade. ✨`
+      },
+      'custom2': {
+        textoBotao: 'Personalizado 2',
+        mensagem: `Mensagem personalizada 2.\nEdite este texto conforme sua necessidade. ✨`
+      },
+      'custom3': {
+        textoBotao: 'Personalizado 3',
+        mensagem: `Mensagem personalizada 3.\nEdite este texto conforme sua necessidade. ✨`
+      },
+      'custom4': {
+        textoBotao: 'Personalizado 4',
+        mensagem: `Mensagem personalizada 4.\nEdite este texto conforme sua necessidade. ✨`
+      },
+      'custom5': {
+        textoBotao: 'Personalizado 5',
+        mensagem: `Mensagem personalizada 5.\nEdite este texto conforme sua necessidade. ✨`
+      },
+      'custom6': {
+        textoBotao: 'Personalizado 6',
+        mensagem: `Mensagem personalizada 6.\nEdite este texto conforme sua necessidade. ✨`
       }
-    });
+    };
 
+    // Carregar dados salvos do localStorage, se existirem
+    function carregarDadosSalvos() {
+      const dadosSalvos = localStorage.getItem('mensagensGraficaCastello');
+      if (dadosSalvos) {
+        mensagens = JSON.parse(dadosSalvos);
+        atualizarBotoes();
+      }
+    }
+
+    // Salvar dados no localStorage
+    function salvarDados() {
+      localStorage.setItem('mensagensGraficaCastello', JSON.stringify(mensagens));
+    }
+
+    // Atualizar os botões na interface com os textos salvos
+    function atualizarBotoes() {
+      for (const [chave, dados] of Object.entries(mensagens)) {
+        const botao = document.querySelector(`button[onclick="enviar('${chave}', this)"]`);
+        if (botao) {
+          botao.textContent = dados.textoBotao;
+        }
+      }
+    }
+
+    // Abrir o painel de edição
+    function abrirPainelEdicao() {
+      const modal = document.getElementById('modalEdicao');
+      const container = document.getElementById('editableButtons');
+      container.innerHTML = '';
+      
+      // Criar campos de edição para cada mensagem
+      for (const [chave, dados] of Object.entries(mensagens)) {
+        const editor = document.createElement('div');
+        editor.className = 'button-editor';
+        editor.innerHTML = `
+          <h3>${chave.replace('_', ' ').toUpperCase()}</h3>
+          <input type="text" id="botao_${chave}" value="${dados.textoBotao}" placeholder="Texto do botão">
+          <textarea id="mensagem_${chave}" placeholder="Mensagem">${dados.mensagem}</textarea>
+        `;
+        container.appendChild(editor);
+      }
+      
+      modal.style.display = 'block';
+    }
+
+    // Fechar o painel de edição
+    function fecharPainelEdicao() {
+      document.getElementById('modalEdicao').style.display = 'none';
+    }
+
+    // Salvar as edições feitas
+    function salvarEdicoes() {
+      for (const chave of Object.keys(mensagens)) {
+        const textoBotao = document.getElementById(`botao_${chave}`).value;
+        const mensagem = document.getElementById(`mensagem_${chave}`).value;
+        
+        mensagens[chave].textoBotao = textoBotao;
+        mensagens[chave].mensagem = mensagem;
+      }
+      
+      salvarDados();
+      atualizarBotoes();
+      fecharPainelEdicao();
+      
+      alert('Alterações salvas com sucesso!');
+    }
+
+    // Função para enviar/copiar mensagens
     function enviar(tipo, btn) {
       const nome = document.getElementById('cliente').value.trim();
       const telefone = document.getElementById('telefone').value.trim();
@@ -248,47 +526,7 @@
       }
       const saudacao = nome ? `Olá, ${nome}! ` : " ";
       
-      // Mensagens com quebras de linha explícitas
-      const mensagens = {
-        'recebido': `Recebemos seu arquivo com sucesso! 📝✨\n\nVocê gostaria que a gente já imprimisse e deixasse prontinho para retirada no balcão?\n\nSó nos confirme por aqui:\n- Se é impressão comum em preto e branco 🖤\n- Ou se deseja colorida ou em papel especial 🎨📄`,
-        
-        'pagamento': `Pagamento confirmado com sucesso! 💸`,
-        
-        'arte_aprovada': `Sua arte foi aprovada! 🚀 Vamos começar a produção.`,
-        
-        'pedido_pronto': `Seu pedido está prontinho para retirada! 📦💜\nVocê pode buscar na nossa loja:\n\n📍 Castello Criativo\nR. Délio da Consolação Rocha, 153 - Loja, Contagem - MG, 32015-180, Brasil\n🕒 Horário de funcionamento:\nSegunda a Sexta, das 8h às 18h\nSábado, das 9h às 12h\n\n🗺️ Localização no Google Maps:\nhttps://g.co/kgs/yz4trcv\n\nEstamos te esperando! 💛`,
-        
-        'avaliacao': `Olá! Gostou do seu pedido? 🥰 \n\nAvalie a Gráfica Castello no Google! É só clickar no link e dar a sua opniao: https://g.page/r/CRtlc8aFTCXPEAE/review\nIsso nos ajuda muito! ⭐⭐⭐⭐⭐`,
-        
-        'endereco': `Nosso endereço é:\nCastello Criativo\nR. Délio da Consolação Rocha, 153 - Loja\nContagem - MG, 32015-180, Brasil\n📍`,
-        
-        'email': `Nosso e-mail para contato é:\ncastellocriativo@gmail.com 📧`,
-        
-        'pagamento_opcoes': `Aceitamos:\n- PIX\n- Cartão de crédito (até 6x sem juros)\n- Cartão de débito\n- Dinheiro\n💳💰`,
-        
-        'orcamento': `Segue seu orçamento solicitado! 💼📋\nQualquer dúvida estou à disposição.`,
-        
-        'autorizacao': `Podemos divulgar fotos do seu material nas nossas redes sociais? 📸\n\nA gente divulga seu negócio e o nosso trabalho juntos! 💛\n\nSe quiser nos acompanhar por lá, é só clicar:\n\n✨ Instagram: instagram.com/castellocriativo\n✨ Facebook: facebook.com/castellocriativo\n✨ TikTok: tiktok.com/@castellocriativo`,
-        
-        'horario': `Nosso horário de funcionamento:\n\nSegunda a Sexta: 8h às 18h\nSábado: 9h às 12h\n🕒`,
-        
-        'pix': `Chave PIX (CNPJ):\n27306705000198\n\nApós efetuar o pagamento, envie o comprovante por gentileza.`,
-        
-        'dados_pedido': `Por favor, envie os dados completos para emissão do pedido:\n- Nome completo\n- CPF/CNPJ\n- Telefone\n- Endereço com CEP\n📝`,
-        
-        'impresso_retirada': `Seu material já foi impresso e está disponível para retirada! 🖨️📦`,
-        
-        'podemos_imprimir': `Podemos deixar o seu material impresso? Se sim, só me fale como quer:\n\n- Comum preto e branco\n- Colorido\n- Em papel especial (couche brilho ou cartão fosco)\n🖨️`,
-        
-        'custom1': `Mensagem personalizada 1.\nEdite este texto conforme sua necessidade. ✨`,
-        'custom2': `Mensagem personalizada 2.\nEdite este texto conforme sua necessidade. ✨`,
-        'custom3': `Mensagem personalizada 3.\nEdite este texto conforme sua necessidade. ✨`,
-        'custom4': `Mensagem personalizada 4.\nEdite este texto conforme sua necessidade. ✨`,
-        'custom5': `Mensagem personalizada 5.\nEdite este texto conforme sua necessidade. ✨`,
-        'custom6': `Mensagem personalizada 6.\nEdite este texto conforme sua necessidade. ✨`
-      };
-
-      const mensagem = mensagens[tipo] || "";
+      const mensagem = mensagens[tipo] ? mensagens[tipo].mensagem : "";
       
       if (modoToggle.checked) {
         // Enviar para WhatsApp - converte quebras de linha para %0A
@@ -306,14 +544,13 @@
       }
     }
     
+    // Função para copiar para a área de transferência
     function copyToClipboard(text, btn) {
-      // Usa a API moderna de clipboard se disponível
       if (navigator.clipboard) {
         navigator.clipboard.writeText(text).then(() => {
           showCopiedFeedback(btn);
         }).catch(err => {
           console.error("Erro ao copiar: ", err);
-          // Fallback para método antigo
           legacyCopy(text, btn);
         });
       } else {
@@ -348,6 +585,24 @@
         btn.style.color = "";
       }, 2000);
     }
+
+    // Inicialização
+    const modoToggle = document.getElementById("modoToggle");
+    const modoTexto = document.getElementById("modoTexto");
+    const modoTextoDireto = document.getElementById("modoTextoDireto");
+    
+    modoToggle.addEventListener("change", function() {
+      if (this.checked) {
+        modoTexto.style.opacity = 0.5;
+        modoTextoDireto.style.opacity = 1;
+      } else {
+        modoTexto.style.opacity = 1;
+        modoTextoDireto.style.opacity = 0.5;
+      }
+    });
+
+    // Carregar dados salvos ao iniciar
+    carregarDadosSalvos();
   </script>
 </body>
 </html>
